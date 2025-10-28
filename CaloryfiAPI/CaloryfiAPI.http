@@ -1,0 +1,6 @@
+@CaloryfiAPI_HostAddress = http://localhost:5182
+
+GET {{CaloryfiAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

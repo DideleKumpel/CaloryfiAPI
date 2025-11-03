@@ -7,12 +7,31 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Model\**" />
+    <Compile Remove="Services\**" />
+    <Content Remove="Model\**" />
+    <Content Remove="Services\**" />
+    <EmbeddedResource Remove="Model\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Model\**" />
+    <None Remove="Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Model\" />
-    <Folder Include="Services\" />
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

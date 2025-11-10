@@ -60,6 +60,10 @@ namespace CaloryfiAPI.Controllers
             {
                 return BadRequest("Email, password, nickname are empty.");
             }
+            if (registerAccount.Weight < 1)
+            {
+                return BadRequest("Invalid weight");
+            }
             if (!IsValidEmail(registerAccount.Email))
             {
                 return BadRequest("Email is invalid");
@@ -89,10 +93,29 @@ namespace CaloryfiAPI.Controllers
                 Username = registerAccount.Username,
                 Password = HashPassword(registerAccount.Password),
             };
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             try
             {
                 await _context.Users.AddAsync(User);
                 _context.SaveChanges();
+
+                UserSetting Settings = new UserSetting { 
+                    UserId = User.Id,
+                    Sex = registerAccount.Sex,
+                    NumberOfMeals= 4,
+                    DietGoal = 1,  //weight 0-lose 2-mentain 3-gain
+                    ActivityLevel = 2, // none 0 to 4 high
+                    Kcal = CalculateCalory(registerAccount.Weight, registerAccount.Sex, 1, 2),
+                    Proteins = 0.3M,
+                    Fats = 0.3M,
+                    Carbs = 0.4M
+                };
+
+                await _context.UserSettings.AddAsync(Settings);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
             catch
             {
@@ -137,5 +160,37 @@ namespace CaloryfiAPI.Controllers
             }
         }
 
+        private int CalculateCalory(int Weight, bool Sex, int Goal, int Acitvity)
+        {
+            double CaloricDemand = Weight * 10;
+            if (Sex) // for female
+            {
+                CaloricDemand += 700;
+            }
+            else //for male
+            {
+                CaloricDemand += 900;
+            }
+            switch (Acitvity)
+            {
+                case 0:
+                    CaloricDemand *= 1.2;
+                    break;
+                case 1:
+                    CaloricDemand *= 1.35;
+                    break;
+                case 2:
+                    CaloricDemand *= 1.5;
+                    break;
+                case 3:
+                    CaloricDemand *= 1.65;
+                    break;
+                case 4:
+                    CaloricDemand *= 1.8;
+                    break;
+            }
+
+            return (int)CaloricDemand;
+        }
     }
 }

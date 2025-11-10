@@ -2,9 +2,12 @@
 using CaloryfiAPI.DTO;
 using CaloryfiAPI.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -124,6 +127,44 @@ namespace CaloryfiAPI.Controllers
             return Ok("Account has benn created");
         }
 
+        [AllowAnonymous]
+        [HttpPost("GetAuthorization")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        {
+            User User = null;
+            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+            {
+                return BadRequest(new { message = "Email and password are required." });
+            }
+            try
+            {
+                User = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.Password == HashPassword(request.Password));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+            if (User == null)
+            {
+                return Unauthorized();
+            }
+            var token = GenerateJwtToken(User.Id);
+            return Ok(new { Token = token });
+        }
+
+        [Authorize]
+        [HttpPost("RefreshToken")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            int userId = -1;
+            bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
+            if (succes && userId > 0)
+            {
+                var token = GenerateJwtToken(userId);
+                return Ok(new { Token = token });
+            }
+            return BadRequest(new { message = "Error occured while reading userID" });
+        }
 
         private bool IsValidEmail(string email)
         {
@@ -191,6 +232,21 @@ namespace CaloryfiAPI.Controllers
             }
 
             return (int)CaloricDemand;
+        }
+
+        private string GenerateJwtToken(int userid)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtConfig:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JwtConfig:Issuer"],
+                audience: _configuration["JwtConfig:Audience"],
+                claims: new[] { new Claim("UserID", userid.ToString()) },
+                expires: DateTime.Now.AddHours(3),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

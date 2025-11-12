@@ -18,7 +18,7 @@ namespace CaloryfiAPI.Controllers
             _context = context;
         }
 
-        [HttpGet("GetProfile")]
+        [HttpGet("GetSettings")]
         [Authorize]
         public async Task<IActionResult> GetSettings(int UserId)
         {
@@ -46,7 +46,7 @@ namespace CaloryfiAPI.Controllers
             }
         }
 
-        [HttpPost("UpdateProfile")]
+        [HttpPost("UpdateSettings")]
         [Authorize]
         public async Task<IActionResult> UpdateSettings([FromBody] UserSetting updatedSettings)
         {

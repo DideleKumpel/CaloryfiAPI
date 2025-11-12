@@ -20,15 +20,18 @@ namespace CaloryfiAPI.Controllers
         private readonly AppDatabaseContext _context;
         private readonly IConfiguration _configuration;
 
-        public UserController(AppDatabaseContext context)
+        public UserController(AppDatabaseContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         [HttpGet("GetProfile")]
         [Authorize]
-        public async Task<IActionResult> GetUserProfile(int userId)
+        public async Task<IActionResult> GetUserProfile()
         {
+            int userId = -1;
+            bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
             if (userId <= 0)
             {
                 return BadRequest(new { message = "Invalid userId." });
@@ -51,7 +54,7 @@ namespace CaloryfiAPI.Controllers
 
             UserProfileData UserProfile = new UserProfileData(UserData);
 
-            return Ok(UserProfile);
+            return Ok(UserData);
         }
 
 
@@ -128,7 +131,7 @@ namespace CaloryfiAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("GetAuthorization")]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             User User = null;

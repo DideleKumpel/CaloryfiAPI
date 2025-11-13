@@ -1,6 +1,6 @@
-@CaloryfiAPI_HostAddress = http://localhost:5182
+@CaloryfiAPI_HostAddress = http://localhost:5000
 
-GET {{CaloryfiAPI_HostAddress}}/weatherforecast/
+GET {{CaloryfiAPI_HostAddress}}/api/
 Accept: application/json
 
 ###

@@ -131,7 +131,7 @@ namespace CaloryfiAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("Login")]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             User User = null;

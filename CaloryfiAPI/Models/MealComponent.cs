@@ -13,6 +13,8 @@ public class MealComponent
     [ForeignKey(nameof(Ingredient))]
     public int IngredientId { get; set; }
 
+    public double Weight { get; set; }
+
     // Navigation properties
     public virtual Meal Meal { get; set; }
     public virtual Ingredient Ingredient { get; set; }

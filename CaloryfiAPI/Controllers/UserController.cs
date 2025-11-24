@@ -131,7 +131,7 @@ namespace CaloryfiAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("Login")]
+        [HttpGet("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             User User = null;
@@ -156,7 +156,7 @@ namespace CaloryfiAPI.Controllers
         }
 
         [Authorize]
-        [HttpPost("RefreshToken")]
+        [HttpGet("RefreshToken")]
         public async Task<IActionResult> RefreshToken()
         {
             int userId = -1;

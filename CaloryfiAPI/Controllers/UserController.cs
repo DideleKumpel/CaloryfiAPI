@@ -141,6 +141,7 @@ namespace CaloryfiAPI.Controllers
             }
             try
             {
+                var test = HashPassword(request.Password);
                 User = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.Password == HashPassword(request.Password));
             }
             catch (Exception ex)

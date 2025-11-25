@@ -58,5 +58,11 @@ public class AppDatabaseContext : DbContext
             .HasMany(i => i.MealComponents)
             .WithOne(mc => mc.Ingredient)
             .HasForeignKey(mc => mc.IngredientId);
+        modelBuilder.Entity<Meal>()
+            .Property(m => m.Date_Added)
+            .HasConversion(
+                v => v.ToUniversalTime(), // zapis do DB jako UTC
+                v => DateTime.SpecifyKind(v, DateTimeKind.Utc) // odczyt z DB jako UTC
+            );
     }
 }

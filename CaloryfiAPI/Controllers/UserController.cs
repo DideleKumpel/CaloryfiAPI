@@ -171,8 +171,8 @@ namespace CaloryfiAPI.Controllers
         }
 
         [Authorize]
-        [HttpGet("ChangePassword")]
-        public async Task<IActionResult> ChangePassword([FromQuery] string oldPassword, [FromQuery] string newPassword)
+        [HttpPost("ChangePassword")]
+        public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword)
         {
             int userId = -1;
             bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);

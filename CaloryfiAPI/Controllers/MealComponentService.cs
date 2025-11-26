@@ -39,7 +39,7 @@ namespace CaloryfiAPI.Controllers
         }
 
         [Authorize]
-        [HttpPost("DeleteComponent")]
+        [HttpDelete("DeleteComponent")]
         public async Task<IActionResult> DeleteComponent(int IngridientId, int MealId)
         {
             if (!TryGetUserId(out int userId))
@@ -77,7 +77,7 @@ namespace CaloryfiAPI.Controllers
             }
             catch
             {
-                return NotFound(new { message = "Meal component not found" });
+                return StatusCode(500, "An error occurred while processing your request.");
             }
         }
 

@@ -170,6 +170,46 @@ namespace CaloryfiAPI.Controllers
             return BadRequest(new { message = "Error occured while reading userID" });
         }
 
+        [Authorize]
+        [HttpGet("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromQuery] string oldPassword, [FromQuery] string newPassword)
+        {
+            int userId = -1;
+            bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
+            if (succes && userId > 0)
+            {
+                User User = null;
+                try
+                {
+                    User = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && u.Password == HashPassword(oldPassword));
+                }
+                catch
+                {
+                    return StatusCode(500, "An error occurred while processing your request.");
+                }
+                if (User == null)
+                {
+                    return Unauthorized(new { message = "Old password is incorrect." });
+                }
+                if (!IsValidPassword(newPassword))
+                {
+                    return BadRequest("Password must have number and capitalized letter");
+                }
+                User.Password = HashPassword(newPassword);
+                try
+                {
+                    _context.Users.Update(User);
+                    await _context.SaveChangesAsync();
+                }
+                catch
+                {
+                    return StatusCode(500, "An error occurred while processing your request.");
+                }
+                return Ok(new { message = "Password has been changed." });
+            }
+            return BadRequest(new { message = "Error occured while reading userID" });
+        }
+
         private bool IsValidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))

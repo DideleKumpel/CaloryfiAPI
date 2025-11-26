@@ -171,9 +171,13 @@ namespace CaloryfiAPI.Controllers
         }
 
         [Authorize]
-        [HttpPost("ChangePassword")]
+        [HttpPost("ChangePassword/{oldPassword}/{newPassword}")]
         public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword)
         {
+            if(oldPassword == newPassword)
+            {
+                return BadRequest("New and old password are the same.");
+            }
             int userId = -1;
             bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
             if (succes && userId > 0)
@@ -206,6 +210,88 @@ namespace CaloryfiAPI.Controllers
                     return StatusCode(500, "An error occurred while processing your request.");
                 }
                 return Ok(new { message = "Password has been changed." });
+            }
+            return BadRequest(new { message = "Error occured while reading userID" });
+        }
+
+        [Authorize]
+        [HttpPost("ChangeEmail/{newEmail}/{Password}")]
+        public async Task<IActionResult> ChangeEmail(string newEmail, string Password)
+        {
+            int userId = -1;
+            bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
+            if (succes && userId > 0)
+            {
+                User User = null;
+                try
+                {
+                    var EmailExist = await _context.Users.FirstOrDefaultAsync(u => u.Email == newEmail);
+                    if (EmailExist == null)
+                    {
+                        return BadRequest("Email already taken");
+                    }
+
+                    User = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && u.Password == HashPassword(Password));
+                }
+                catch
+                {
+                    return StatusCode(500, "An error occurred while processing your request.");
+                }
+                if (User == null)
+                {
+                    return Unauthorized(new { message = "Password is incorrect." });
+                }
+                if (!IsValidEmail(newEmail))
+                {
+                    return BadRequest("Invalid email");
+                }
+                User.Email = newEmail;
+                try
+                {
+                    _context.Users.Update(User);
+                    await _context.SaveChangesAsync();
+                }
+                catch
+                {
+                    return StatusCode(500, "An error occurred while processing your request.");
+                }
+                return Ok(new { message = "Email has been changed." });
+            }
+            return BadRequest(new { message = "Error occured while reading userID" });
+        }
+
+        [Authorize]
+        [HttpPost("ChangeUsername/{newUsername}")]
+        public async Task<IActionResult> ChangeUsername(string newUsername)
+        {
+            int userId = -1;
+            bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
+            if (succes && userId > 0)
+            {
+                User User = null;
+                try
+                {
+                    User = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                    if(User == null)
+                    {
+                        return BadRequest("User not found");
+                    }
+                    User.Username = newUsername;
+                    try
+                    {
+                        _context.Users.Update(User);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch
+                    {
+                        return StatusCode(500, "An error occurred while processing your request.");
+                    }
+                    return Ok(new { message = "Password has been changed." });
+                }
+                catch
+                {
+                    return StatusCode(500, "An error occurred while processing your request.");
+                }
             }
             return BadRequest(new { message = "Error occured while reading userID" });
         }

@@ -215,8 +215,8 @@ namespace CaloryfiAPI.Controllers
         }
 
         [Authorize]
-        [HttpPost("ChangeEmail/{newEmail}/{Password}")]
-        public async Task<IActionResult> ChangeEmail(string newEmail, string Password)
+        [HttpPost("ChangeEmail/{newEmail}")]
+        public async Task<IActionResult> ChangeEmail(string newEmail)
         {
             int userId = -1;
             bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
@@ -226,20 +226,16 @@ namespace CaloryfiAPI.Controllers
                 try
                 {
                     var EmailExist = await _context.Users.FirstOrDefaultAsync(u => u.Email == newEmail);
-                    if (EmailExist == null)
+                    if (EmailExist != null)
                     {
                         return BadRequest("Email already taken");
                     }
 
-                    User = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && u.Password == HashPassword(Password));
+                    User = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 }
                 catch
                 {
                     return StatusCode(500, "An error occurred while processing your request.");
-                }
-                if (User == null)
-                {
-                    return Unauthorized(new { message = "Password is incorrect." });
                 }
                 if (!IsValidEmail(newEmail))
                 {
@@ -286,7 +282,7 @@ namespace CaloryfiAPI.Controllers
                     {
                         return StatusCode(500, "An error occurred while processing your request.");
                     }
-                    return Ok(new { message = "Password has been changed." });
+                    return Ok(new { message = "Username has been changed." });
                 }
                 catch
                 {

@@ -1,7 +1,10 @@
 ﻿using CaloryfiAPI.Data;
+using CaloryfiAPI.DTO;
 using CaloryfiAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CaloryfiAPI.Controllers
 {
@@ -18,17 +21,21 @@ namespace CaloryfiAPI.Controllers
 
         [HttpGet("GetCurrentWeight")]
         [Authorize]
-        private async Task<IActionResult> GetCurrentWeight()
+        public async Task<IActionResult> GetCurrentWeight()
         {
             int userId = -1;
             bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
-            if(succes == false || userId<0){
+            if (succes == false || userId < 0)
+            {
                 return BadRequest(new { message = "Error occured while reading userID" });
             }
             try
             {
-                var Weight = _context.WeightHistories.LastOrDefault(w => w.UserId == userId);
-                if(Weight == null)
+                var Weight  = await _context.WeightHistories
+                            .Where(w => w.UserId == userId)
+                            .OrderByDescending(w => w.Date)
+                            .FirstOrDefaultAsync();
+                if (Weight == null)
                 {
                     return NotFound("Weight history not found add your weight");
                 }
@@ -42,7 +49,7 @@ namespace CaloryfiAPI.Controllers
 
         [HttpPost("UpdateWeight/{newWeight}")]
         [Authorize]
-        private async Task<IActionResult> UpdateWeight(int newWeight)
+        public async Task<IActionResult> UpdateWeight(int newWeight)
         {
             int userId = -1;
             bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
@@ -52,14 +59,16 @@ namespace CaloryfiAPI.Controllers
             }
             try
             {
-                var Weight = _context.WeightHistories.LastOrDefault(w => w.UserId == userId && w.Date == DateTime.UtcNow);
+                var today = DateTime.UtcNow.Date;   
+                var tomorrow = today.AddDays(1);
+                var Weight = _context.WeightHistories.FirstOrDefault(w => w.UserId == userId && w.Date >= today && w.Date < tomorrow);
                 if (Weight == null)
                 {
-                    WeightHistory weightHistory = new WeightHistory
+                    Weight = new WeightHistory
                     {
                         UserId = userId,
                         Weight = newWeight,
-                        Date = DateTime.UtcNow
+                        Date = DateTime.UtcNow.Date
                     };
                     await _context.WeightHistories.AddAsync(Weight);
                 }
@@ -69,13 +78,51 @@ namespace CaloryfiAPI.Controllers
                     _context.WeightHistories.Update(Weight);
                 }
                 await _context.SaveChangesAsync();
-                return Ok(Weight);
+                return Ok("Weight updated");
             }
             catch
             {
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
+
+        [HttpGet("GetWeightHistory/{dateFrom}/{dateTo}")]
+        [Authorize]
+        public async Task<IActionResult> GetWeightHistory(DateTime dateFrom, DateTime dateTo)
+        {
+            int userId = -1;
+            bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
+            if (succes == false || userId < 0)
+            {
+                return BadRequest(new { message = "Error occured while reading userID" });
+            }
+            WeightHistory? data = null;
+            try
+            {
+                data = await _context.WeightHistories
+                    .Where(wh => wh.UserId == userId && wh.Date >= dateFrom && wh.Date <= dateTo)
+                    .OrderByDescending(wh => wh.Date)
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+
+            if (data == null)
+            {
+                return NotFound(new { message = "Can't find weight history in this range" });
+            }
+
+            // Mapowanie na DTO
+            var response = new WeightHistoryDTO
+            {
+                Date = data.Date,
+                Weight = data.Weight
+            };
+
+            return Ok(response);
         }
+    }
 }
 

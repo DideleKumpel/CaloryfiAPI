@@ -16,4 +16,6 @@ public class WeightHistory
 
     // Navigation property
     public virtual User User { get; set; }
+
+
 }

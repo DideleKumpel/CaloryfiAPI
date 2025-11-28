@@ -120,6 +120,14 @@ namespace CaloryfiAPI.Controllers
                 };
 
                 await _context.UserSettings.AddAsync(Settings);
+
+                WeightHistory weightHistory = new WeightHistory
+                {
+                    UserId = User.Id,
+                    Date = DateTime.UtcNow
+                };
+                await _context.WeightHistories.AddAsync(weightHistory);
+
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }

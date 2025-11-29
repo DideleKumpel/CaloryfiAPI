@@ -1,5 +1,6 @@
 ﻿using CaloryfiAPI.Data;
 using CaloryfiAPI.Models;
+using CaloryfiAPI.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +49,7 @@ namespace CaloryfiAPI.Controllers
 
         [HttpPost("UpdateSettings")]
         [Authorize]
-        public async Task<IActionResult> UpdateSettings([FromBody] UserSetting updatedSettings)
+        public async Task<IActionResult> UpdateSettings([FromBody] UserSettingsDTO updatedSettings)
         {
             int userId = -1;
             bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
@@ -89,6 +90,21 @@ namespace CaloryfiAPI.Controllers
         }
 
         private bool IsValidSetting(UserSetting setting)
+        {
+            if (setting.NumberOfMeals < 1 || setting.NumberOfMeals > 10)
+                return false;
+            if (setting.DietGoal < 0 || setting.DietGoal > 3)
+                return false;
+            if (setting.ActivityLevel < 0 || setting.ActivityLevel > 4)
+                return false;
+            if (setting.Kcal < 0 || setting.Carbs < 0 || setting.Proteins < 0 || setting.Fats < 0)
+                return false;
+            if (setting.Carbs + setting.Proteins + setting.Fats != 1)
+                return false;
+            return true;
+        }
+
+        private bool IsValidSetting(UserSettingsDTO setting)
         {
             if (setting.NumberOfMeals < 1 || setting.NumberOfMeals > 10)
                 return false;

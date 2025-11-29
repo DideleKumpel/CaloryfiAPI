@@ -10,11 +10,11 @@ namespace CaloryfiAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class WeightHisotryController : Controller
+    public class WeightHistoryController : Controller
     {
         private readonly AppDatabaseContext _context;
 
-        public WeightHisotryController(AppDatabaseContext context)
+        public WeightHistoryController(AppDatabaseContext context)
         {
             _context = context;
         }

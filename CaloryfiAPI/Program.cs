@@ -74,7 +74,7 @@ namespace CaloryfiAPI
             });
             builder.Services.AddAuthorization();
 
-            //builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:5001");
+            builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:5001");
 
 
             var app = builder.Build();

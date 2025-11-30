@@ -107,8 +107,8 @@ namespace CaloryfiAPI.Controllers
             }
         }
 
-        [HttpGet("DeleteMeal/{mealId}")]
-        [HttpDelete]
+        [HttpDelete("DeleteMeal/{mealId}")]
+        [Authorize]
         public async Task<IActionResult> DeleteMeal(int mealId)
         {
             if (!TryGetUserId(out int userId))
@@ -132,6 +132,30 @@ namespace CaloryfiAPI.Controllers
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
+
+        [HttpPost("AddMeal")]
+        [Authorize]
+        public async Task<IActionResult> AddMeal()
+        {
+            if (!TryGetUserId(out int userId))
+                return BadRequest(new { message = "Error occurred while reading userID" });
+            try
+            {
+                var meal = new Meal
+                {
+                    UserId = userId,
+                    Date_Added = DateTime.UtcNow.Date
+                };
+                _context.Meals.Add(meal);
+                await _context.SaveChangesAsync();
+                return Ok(meal.Id);
+            }
+            catch
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
 
         private bool TryGetUserId(out int userId)
         {

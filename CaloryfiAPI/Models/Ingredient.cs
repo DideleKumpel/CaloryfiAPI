@@ -17,9 +17,9 @@ public class Ingredient
     public int Fats { get; set; }
 
     [ForeignKey(nameof(User))]
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     // Navigation properties
-    public virtual User User { get; set; }
+    public virtual User? User { get; set; }
     public virtual ICollection<MealComponent> MealComponents { get; set; }
 }

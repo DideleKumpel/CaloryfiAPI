@@ -40,5 +40,44 @@ namespace CaloryfiAPI.Controllers
             }
         }
 
+        [HttpPost("AddCustomIngredient")]
+        [Authorize]
+        public async Task<IActionResult> AddCustomIngredient([FromBody]IngredientDTO newIngredient)
+        {
+            int userId = -1;
+            bool succes = int.TryParse(User.FindFirst("UserID")?.Value, out userId);
+            if (!succes)
+            {
+                return BadRequest(new { message = "Error occured while reading userID" });
+            }
+            if (newIngredient.UserId != userId)
+            {
+                return BadRequest("Invalid user id");
+            }
+            if(newIngredient.Name == null || newIngredient.Fats < 0 || newIngredient.Proteins < 0 || newIngredient.Carbs < 0 || newIngredient.Kcal < 0)
+            {
+                return BadRequest("Invalid ingredient data");
+            }
+            try
+            {
+                var ingredient = new Ingredient
+                {
+                    Name = newIngredient.Name,
+                    Kcal = newIngredient.Kcal,
+                    Proteins = newIngredient.Proteins,
+                    Carbs = newIngredient.Carbs,
+                    Fats = newIngredient.Fats,
+                    UserId = newIngredient.UserId
+                };
+                _context.Ingredients.Add(ingredient);
+                await _context.SaveChangesAsync();
+                return Ok(ingredient.Id);
+            }
+            catch
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
     }
 }

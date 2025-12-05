@@ -58,6 +58,7 @@ public class AppDatabaseContext : DbContext
             .HasMany(i => i.MealComponents)
             .WithOne(mc => mc.Ingredient)
             .HasForeignKey(mc => mc.IngredientId);
+
         modelBuilder.Entity<Meal>()
             .Property(m => m.Date_Added)
             .HasConversion(

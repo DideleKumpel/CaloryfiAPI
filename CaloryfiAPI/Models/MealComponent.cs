@@ -5,17 +5,18 @@ namespace CaloryfiAPI.Models;
 
 public class MealComponent
 {
-    [Key, Column(Order = 0)]
+    [Key]
+    public int Id { get; set; }
+
     [ForeignKey(nameof(Meal))]
     public int MealId { get; set; }
 
-    [Key, Column(Order = 1)]
     [ForeignKey(nameof(Ingredient))]
     public int IngredientId { get; set; }
 
-    public double Weight { get; set; }
+    public double Quantity { get; set; } // opcjonalnie — gramatura, porcja itp.
 
-    // Navigation properties
+    // Navigation
     public virtual Meal Meal { get; set; }
     public virtual Ingredient Ingredient { get; set; }
 }

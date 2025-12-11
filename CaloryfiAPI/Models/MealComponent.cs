@@ -14,7 +14,7 @@ public class MealComponent
     [ForeignKey(nameof(Ingredient))]
     public int IngredientId { get; set; }
 
-    public double Quantity { get; set; } // opcjonalnie — gramatura, porcja itp.
+    public double Weight { get; set; }
 
     // Navigation
     public virtual Meal Meal { get; set; }

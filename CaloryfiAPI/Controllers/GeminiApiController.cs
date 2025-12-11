@@ -1,6 +1,7 @@
 ﻿using CaloryfiAPI.DTO;
 using Google.GenAI;
 using Google.GenAI.Types;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
@@ -15,11 +16,12 @@ namespace CaloryfiAPI.Controllers
 
         public GeminiApiController(IConfiguration configuration)
         {
-            apiKey = "AIzaSyCtPoAoIcxdlyoyIKPPhA7BinKWrVocFVk";
+            apiKey = configuration["AiApiKey:Key"];
         }
 
-        [HttpGet("AutoCalculateIngredientmMakro")]
-        public async Task<IActionResult> AutoCalculateIngredientmMakro([FromQuery] string ingredientName)
+        [Authorize]
+        [HttpGet("AutoCalculateIngredientmMakro/{ingredientName}")]
+        public async Task<IActionResult> AutoCalculateIngredientmMakro(string ingredientName)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
             {
@@ -32,7 +34,7 @@ namespace CaloryfiAPI.Controllers
             try
             {
                 var client = new Client(apiKey: apiKey);
-                string prompt = $"Provide the nutritional information (kcal, carbs, proteins, fats) for the ingredient: {ingredientName}. Respond in JSON format.{{ \"Kcal\": , \"Carbs\": ,\"Proteins\": ,\"Fats\": }}";
+                string prompt = $"Provide the nutritional information (kcal, carbs, proteins, fats) for the ingredient: {ingredientName}. Respond in JSON format nubers write as int.{{ \"Kcal\": , \"Carbs\": ,\"Proteins\": ,\"Fats\": }}";
                 var response = await client.Models.GenerateContentAsync(
                   model: "gemini-2.5-flash-lite", contents: prompt
                 );

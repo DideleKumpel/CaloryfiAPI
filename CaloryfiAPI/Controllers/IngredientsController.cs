@@ -50,10 +50,6 @@ namespace CaloryfiAPI.Controllers
             {
                 return BadRequest(new { message = "Error occured while reading userID" });
             }
-            if (newIngredient.UserId != userId)
-            {
-                return BadRequest("Invalid user id");
-            }
             if(newIngredient.Name == null || newIngredient.Fats < 0 || newIngredient.Proteins < 0 || newIngredient.Carbs < 0 || newIngredient.Kcal < 0)
             {
                 return BadRequest("Invalid ingredient data");
@@ -67,7 +63,7 @@ namespace CaloryfiAPI.Controllers
                     Proteins = newIngredient.Proteins,
                     Carbs = newIngredient.Carbs,
                     Fats = newIngredient.Fats,
-                    UserId = newIngredient.UserId
+                    UserId = userId
                 };
                 _context.Ingredients.Add(ingredient);
                 await _context.SaveChangesAsync();

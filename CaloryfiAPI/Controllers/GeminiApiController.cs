@@ -73,10 +73,7 @@ namespace CaloryfiAPI.Controllers
             {
                 return BadRequest("Invalid food data.");
             }
-            if (!allowedExtensions.Contains(foodFormImageDTO.Image.Extension))
-            {
-                return BadRequest("Wrong image extension.");
-            }
+            
             try
             {
                 var client = new Client(apiKey: apiKey);
@@ -90,6 +87,10 @@ namespace CaloryfiAPI.Controllers
                 }
                 else
                 {
+                    if (!allowedExtensions.Contains(foodFormImageDTO.Image.Extension))
+                    {
+                        return BadRequest("Wrong image extension.");
+                    }
                     string extension = foodFormImageDTO.Image.Extension.TrimStart('.').ToLower();
                     string mimeType = extension switch
                     {
@@ -116,6 +117,7 @@ namespace CaloryfiAPI.Controllers
                 string objectString = response.Candidates[0].Content.Parts[0].Text;
                 objectString = objectString.Replace("```json", "").Replace("```", "").Trim();
                 var result = JsonConvert.DeserializeObject<IngredientDTO>(objectString);
+                result.Name = foodFormImageDTO.Name;
                 return Ok(result);
             }
             catch (Exception ex)
